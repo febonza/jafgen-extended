@@ -17,6 +17,7 @@ pip-wheel-metadata/
 .vscode/
 /*.iml
 .ruff_cache/
+uv.lock
 
 # miscellaneous
 
