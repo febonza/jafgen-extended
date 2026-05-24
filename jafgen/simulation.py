@@ -1,4 +1,5 @@
 import csv
+import datetime as dt
 import os
 from typing import Any
 
@@ -75,23 +76,68 @@ class Simulation:
                     if tweet:
                         self.tweets.append(tweet)
 
-    def save_results(self) -> None:
+    def save_results(
+        self,
+        center_on: dt.date | None = None,
+        export_from: dt.date | None = None,
+    ) -> None:
+        epoch_date = Day.EPOCH.date()
+        shift = (center_on - epoch_date) if center_on is not None else None
+
+        def _shift_date(iso_str: str) -> str:
+            if shift is None:
+                return iso_str
+            return (dt.datetime.fromisoformat(iso_str) + shift).isoformat()
+
+        def _keep(iso_str: str) -> bool:
+            if export_from is None:
+                return True
+            return dt.datetime.fromisoformat(iso_str).date() >= export_from
+
+        orders_dicts: list[dict[str, Any]] = []
+        for order in self.orders:
+            row = order.to_dict()
+            row["ordered_at"] = _shift_date(row["ordered_at"])
+            if _keep(row["ordered_at"]):
+                orders_dicts.append(row)
+
+        kept_ids = {row["id"] for row in orders_dicts}
+        order_items_dicts = [
+            item_row
+            for order in self.orders
+            for item_row in order.order_items_to_dict()
+            if item_row["order_id"] in kept_ids
+        ]
+
+        tweets_dicts: list[dict[str, Any]] = []
+        for tweet in self.tweets:
+            row = tweet.to_dict()
+            row["tweeted_at"] = _shift_date(row["tweeted_at"])
+            if _keep(row["tweeted_at"]):
+                tweets_dicts.append(row)
+
+        stores_dicts: list[dict[str, Any]] = []
+        for market in self.markets:
+            row = market.store.to_dict()
+            row["opened_at"] = _shift_date(row["opened_at"])
+            stores_dicts.append(row)
+
         stock: Stock = Stock()
         inventory: Inventory = Inventory()
         entities: dict[str, list[dict[str, Any]]] = {
             "customers": [customer.to_dict() for customer in self.customers.values()],
-            "orders": [order.to_dict() for order in self.orders],
-            "order_items": [row for order in self.orders for row in order.order_items_to_dict()],
-            "stores": [market.store.to_dict() for market in self.markets],
+            "orders": orders_dicts,
+            "order_items": order_items_dicts,
+            "stores": stores_dicts,
             "supplies": stock.to_dict(),
             "products": inventory.to_dict(),
-            "tweets": [tweet.to_dict() for tweet in self.tweets],
+            "tweets": tweets_dicts,
         }
 
         if not os.path.exists("./jaffle-data"):
             os.makedirs("./jaffle-data")
         for entity, data in track(
-            entities.items(), description="🚚 Delivering jaffles..."
+            entities.items(), description="Delivering jaffles..."
         ):
             if data:
                 file = f"./jaffle-data/{self.prefix}_{entity}.csv"
