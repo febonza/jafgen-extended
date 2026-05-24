@@ -1,4 +1,13 @@
-# 🥪 Jaffle Shop Generator 🏭
+# Jaffle Shop Generator — extended fork
+
+> [!IMPORTANT]
+> This is **`febonza/jafgen-extended`**, a divergent fork of [`dbt-labs/jaffle-shop-generator`](https://github.com/dbt-labs/jaffle-shop-generator). It adds realism enhancements for use with the [Jaffle Shop portfolio project](https://github.com/febonza/jaffle-shop). It is not a drop-in replacement for the upstream package and is not published to PyPI.
+>
+> Changes relative to upstream `main` (as of fork creation):
+> - **Product rename** — `Item` -> `Product`, `ItemType` -> `ProductType`; output is `raw_products.csv` and `raw_order_items.csv` (with `quantity` column) rather than `raw_items.csv`.
+> - **Lowercase product types** — `type` column is `jaffle` / `beverage` (not `ItemType.JAFFLE`).
+> - **`--center-on <YYYY-MM-DD>`** — shifts all output dates so the simulation starts on the given date instead of the default epoch (2023-09-01).
+> - **`--export-from <YYYY-MM-DD>`** — drops orders and tweets with dates before the given threshold; reference data is always included. Composes with `--center-on` (shift first, then filter).
 
 > [!NOTE]
 > This is not an official dbt Labs project. It is maintained on a volunteer basis by dbt Labs employees who are passionate about analytics engineering, the dbt Community, and jaffles, and feel that generating datasets for learning and practicing is important. Please understand it's a work in progress and not supported in the same way as dbt itself.
@@ -43,10 +52,20 @@ The following options are available:
 
 - `--pre` sets a prefix for the generated files in the format `[prefix]_[file_name].csv`. It defaults to `raw`.
 
-Generate a simulation spanning 3 years from 2016-2019 with a prefix of `cool`:
+- `--center-on <YYYY-MM-DD>` shifts all output dates so the simulation starts on the given date. Useful when you need the data anchored to a specific calendar period rather than the default epoch.
+
+- `--export-from <YYYY-MM-DD>` drops orders and tweets whose date falls before the given threshold. Reference data (customers, stores, products, supplies) is always written. Can be combined with `--center-on`; the shift is applied first.
+
+Generate a simulation spanning 3 years anchored to 2022-01-01:
 
 ```shell
-jafgen 3 --pre cool
+jafgen 3 --center-on 2022-01-01
+```
+
+Generate one year of data starting from 2022-01-01, exporting only from the 90th day onward:
+
+```shell
+jafgen 1 --center-on 2022-01-01 --export-from 2022-04-01
 ```
 
 ## Purpose
