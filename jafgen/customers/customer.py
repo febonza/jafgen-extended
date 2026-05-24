@@ -119,8 +119,7 @@ class RemoteWorker(Customer):
         return 0.01
 
     def get_order_minute(self, day: Day) -> int:
-        avg_time = 60 * 7
-        order_time = np.random.normal(loc=avg_time, scale=180)
+        order_time = np.random.normal(loc=60 * 12 + 30, scale=90)
         return max(0, int(order_time))
 
     def get_order_items(self, day: Day) -> list[OrderItem]:
@@ -148,8 +147,8 @@ class BrunchCrowd(Customer):
         return 0.8
 
     def get_order_minute(self, day: Day) -> int:
-        avg_time = 300 + ((self.favorite_number - 50) / 50) * 120
-        order_time = np.random.normal(loc=avg_time, scale=120)
+        avg_time = 60 * 10 + 30 + ((self.favorite_number - 50) / 50) * 60
+        order_time = np.random.normal(loc=avg_time, scale=60)
         return max(0, int(order_time))
 
     def get_order_items(self, day: Day) -> list[OrderItem]:
@@ -172,8 +171,7 @@ class Commuter(Customer):
         return 0.2
 
     def get_order_minute(self, day: Day) -> int:
-        avg_time = 60
-        order_time = np.random.normal(loc=avg_time, scale=30)
+        order_time = np.random.normal(loc=60 * 7, scale=30)
         return max(0, int(order_time))
 
     def get_order_items(self, day: Day) -> list[OrderItem]:
@@ -218,8 +216,7 @@ class Casuals(Customer):
         return 0.1
 
     def get_order_minute(self, day: Day) -> int:
-        avg_time = 5 * 60
-        order_time = np.random.normal(loc=avg_time, scale=120)
+        order_time = np.random.normal(loc=60 * 18, scale=90)
         return max(0, int(order_time))
 
     def get_order_items(self, day: Day) -> list[OrderItem]:
@@ -245,10 +242,52 @@ class HealthNut(Customer):
         return 0.6
 
     def get_order_minute(self, day: Day) -> int:
-        avg_time = 5 * 60
-        order_time = np.random.normal(loc=avg_time, scale=120)
+        order_time = np.random.normal(loc=60 * 10 + 30, scale=60)
         return max(0, int(order_time))
 
     def get_order_items(self, day: Day) -> list[OrderItem]:
         products = Inventory.get_item_type(ProductType.BEVERAGE, 1)
+        return _to_order_items(products)
+
+
+class LunchRusher(Customer):
+    """Quick bite between meetings."""
+
+    def p_buy_persona(self, day: Day) -> float:
+        return 0.6 + (self.favorite_number / 100) * 0.3
+
+    def p_tweet_persona(self, day: Day) -> float:
+        return 0.05
+
+    def get_order_minute(self, day: Day) -> int:
+        order_time = np.random.normal(loc=60 * 13, scale=20)
+        return max(0, int(order_time))
+
+    def get_order_items(self, day: Day) -> list[OrderItem]:
+        food = Inventory.get_item_type(ProductType.JAFFLE, 1)
+        drink = Inventory.get_item_type(ProductType.BEVERAGE, 1) if fake.random.random() > 0.5 else []
+        return _to_order_items(food + drink)
+
+
+class DinnerCrowd(Customer):
+    """Evening group out for a casual dinner."""
+
+    def p_buy_persona(self, day: Day) -> float:
+        base = 0.4 + (self.favorite_number / 100) * 0.3
+        return min(base * 1.4, 1.0) if day.is_weekend else base
+
+    def p_tweet_persona(self, day: Day) -> float:
+        return 0.3
+
+    def get_order_minute(self, day: Day) -> int:
+        order_time = np.random.normal(loc=60 * 19, scale=40)
+        return max(0, int(order_time))
+
+    def get_order_items(self, day: Day) -> list[OrderItem]:
+        num_food = 1 + int(fake.random.random() * 2)
+        num_drinks = 1 + int(fake.random.random() * 2)
+        products = (
+            Inventory.get_item_type(ProductType.JAFFLE, num_food)
+            + Inventory.get_item_type(ProductType.BEVERAGE, num_drinks)
+        )
         return _to_order_items(products)

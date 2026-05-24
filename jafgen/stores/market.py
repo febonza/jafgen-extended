@@ -8,7 +8,9 @@ from jafgen.customers.customer import (
     Casuals,
     Commuter,
     Customer,
+    DinnerCrowd,
     HealthNut,
+    LunchRusher,
     RemoteWorker,
     Student,
 )
@@ -21,12 +23,14 @@ fake = Faker()
 
 class Market:
     PersonaMix = [
-        (Commuter, 0.25),
-        (RemoteWorker, 0.25),
-        (BrunchCrowd, 0.1),
-        (Student, 0.2),
-        (Casuals, 0.1),
-        (HealthNut, 0.1),
+        (Commuter, 0.175),
+        (RemoteWorker, 0.175),
+        (BrunchCrowd, 0.07),
+        (Student, 0.14),
+        (Casuals, 0.07),
+        (HealthNut, 0.07),
+        (LunchRusher, 0.15),
+        (DinnerCrowd, 0.15),
     ]
 
     def __init__(self, store: Store, num_customers: int, days_to_penetration: int = 365):

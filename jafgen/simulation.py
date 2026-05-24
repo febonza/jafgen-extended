@@ -20,9 +20,9 @@ from jafgen.time import (
 )
 
 T_7AM = time_from_total_minutes(60 * 7)
-T_8AM = time_from_total_minutes(60 * 8)
+T_9AM = time_from_total_minutes(60 * 9)
 T_3PM = time_from_total_minutes(60 * 15)
-T_8PM = time_from_total_minutes(60 * 20)
+T_9PM = time_from_total_minutes(60 * 21)
 
 class Simulation:
     def __init__(self, years: int, days: int, prefix: str):
@@ -46,8 +46,8 @@ class Simulation:
                     name=store_name,
                     base_popularity=popularity,
                     hours_of_operation=WeekHoursOfOperation(
-                        week_days=DayHoursOfOperation(opens_at=T_7AM, closes_at=T_8PM),
-                        weekends=DayHoursOfOperation(opens_at=T_8AM, closes_at=T_3PM),
+                        week_days=DayHoursOfOperation(opens_at=T_7AM, closes_at=T_9PM),
+                        weekends=DayHoursOfOperation(opens_at=T_9AM, closes_at=T_3PM),
                     ),
                     opened_day=Day(opened_date),
                     tax_rate=tax,
