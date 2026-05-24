@@ -1,7 +1,10 @@
 import datetime as dt
+import random
 from typing import Annotated, Optional
 
+import numpy as np
 import typer
+from faker import Faker
 
 from jafgen.simulation import Simulation
 from jafgen.time import Day
@@ -19,6 +22,12 @@ def _parse_date(value: Optional[str], flag: str) -> Optional[dt.date]:
             f"'{value}' is not a valid ISO date (expected YYYY-MM-DD)",
             param_hint=f"'{flag}'",
         )
+
+
+def _seed_all(seed: int) -> None:
+    Faker.seed(seed)
+    np.random.seed(seed)
+    random.seed(seed)
 
 
 @app.command()
@@ -47,11 +56,18 @@ def run(
             help="Exclude rows with dates before this date from orders and tweets (YYYY-MM-DD).",
         ),
     ] = None,
+    seed: Annotated[
+        Optional[int],
+        typer.Option(help="Random seed for reproducible output."),
+    ] = None,
 ) -> None:
 
     # To keep the default value for backwards compatibility.
     if years == 0 and days == 0:
         years = 1
+
+    if seed is not None:
+        _seed_all(seed)
 
     center_on_date = _parse_date(center_on, "--center-on")
     export_from_date = _parse_date(export_from, "--export-from")
