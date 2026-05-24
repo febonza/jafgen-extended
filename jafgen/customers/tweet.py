@@ -4,7 +4,7 @@ from typing import NewType
 
 from faker import Faker
 
-import jafgen.customers.customers as customer
+import jafgen.customers.customer as customer
 from jafgen.customers.order import Order
 from jafgen.time import Day
 
@@ -33,12 +33,18 @@ class Tweet:
         }
 
     def _construct_tweet(self) -> str:
-        if len(self.order.items) == 1:
-            items_sentence = f"Ordered a {self.order.items[0].name}"
-        elif len(self.order.items) == 2:
-            items_sentence = f"Ordered a {self.order.items[0].name} and a {self.order.items[1].name}"
+        # Flatten order_items to individual product names for sentence construction
+        product_names = [
+            item.product.name
+            for item in self.order.order_items
+            for _ in range(item.quantity)
+        ]
+        if len(product_names) == 1:
+            items_sentence = f"Ordered a {product_names[0]}"
+        elif len(product_names) == 2:
+            items_sentence = f"Ordered a {product_names[0]} and a {product_names[1]}"
         else:
-            items_sentence = f"Ordered a {', a '.join(item.name for item in self.order.items[:-1])}, and a {self.order.items[-1].name}"
+            items_sentence = f"Ordered a {', a '.join(product_names[:-1])}, and a {product_names[-1]}"
         if self.customer.fan_level > 3:
             adjective = fake.random.choice(
                 [

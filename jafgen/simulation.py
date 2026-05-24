@@ -4,7 +4,7 @@ from typing import Any
 
 from rich.progress import track
 
-from jafgen.customers.customers import Customer, CustomerId
+from jafgen.customers.customer import Customer, CustomerId
 from jafgen.customers.order import Order
 from jafgen.customers.tweet import Tweet
 from jafgen.stores.inventory import Inventory
@@ -81,7 +81,7 @@ class Simulation:
         entities: dict[str, list[dict[str, Any]]] = {
             "customers": [customer.to_dict() for customer in self.customers.values()],
             "orders": [order.to_dict() for order in self.orders],
-            "items": [item.to_dict() for order in self.orders for item in order.items],
+            "order_items": [row for order in self.orders for row in order.order_items_to_dict()],
             "stores": [market.store.to_dict() for market in self.markets],
             "supplies": stock.to_dict(),
             "products": inventory.to_dict(),

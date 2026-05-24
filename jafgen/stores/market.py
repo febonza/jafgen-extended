@@ -3,7 +3,7 @@ from typing import Iterator
 import numpy as np
 from faker import Faker
 
-from jafgen.customers.customers import (
+from jafgen.customers.customer import (
     BrunchCrowd,
     Casuals,
     Commuter,

@@ -5,7 +5,7 @@ from typing import Any
 from jafgen.stores.supply import StorageKeepingUnit
 
 
-class ItemType(str, Enum):
+class ProductType(str, Enum):
     JAFFLE = "JAFFLE"
     BEVERAGE = "BEVERAGE"
 
@@ -14,11 +14,11 @@ class ItemType(str, Enum):
 
 
 @dataclass(frozen=True)
-class Item:
+class Product:
     sku: StorageKeepingUnit
     name: str
     description: str
-    type: ItemType
+    type: ProductType
     price: float
 
     def __str__(self):

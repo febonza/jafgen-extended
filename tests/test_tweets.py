@@ -1,5 +1,5 @@
 from jafgen.time import Day
-from jafgen.customers.customers import (
+from jafgen.customers.customer import (
     BrunchCrowd,
     Casuals,
     Commuter,

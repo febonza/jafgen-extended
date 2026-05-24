@@ -1,7 +1,7 @@
 from jafgen.time import Day
-from jafgen.customers.customers import Customer, BrunchCrowd, RemoteWorker, Student
-from jafgen.customers.order import Order
-from jafgen.stores.item import ItemType
+from jafgen.customers.customer import Customer, BrunchCrowd, RemoteWorker, Student
+from jafgen.customers.order import Order, OrderItem
+from jafgen.stores.product import ProductType
 from jafgen.stores.inventory import Inventory
 from jafgen.stores.store import Store
 
@@ -13,24 +13,25 @@ def test_order_totals(default_store: Store):
     customer_types: list[type[Customer]] = [RemoteWorker, BrunchCrowd, Student]
     for i in range(1000):
         for CustType in customer_types:
+            order_items = [
+                OrderItem(product=p, quantity=1)
+                for p in (
+                    inventory.get_item_type(ProductType.JAFFLE, 2)
+                    + inventory.get_item_type(ProductType.BEVERAGE, 1)
+                )
+            ]
             orders.append(
                 Order(
                     customer=CustType(store=default_store),
-                    items=
-                        inventory.get_item_type(ItemType.JAFFLE, 2) +
-                        inventory.get_item_type(ItemType.BEVERAGE, 1),
+                    order_items=order_items,
                     store=default_store,
                     day=Day(date_index=i),
                 )
             )
 
     for order in orders:
-        assert (
-            order.subtotal
-            == order.items[0].price
-            + order.items[1].price
-            + order.items[2].price
-        )
+        expected_subtotal = sum(i.product.price * i.quantity for i in order.order_items)
+        assert order.subtotal == expected_subtotal
         assert order.tax_paid == order.subtotal * order.store.tax_rate
         assert order.total == order.subtotal + order.tax_paid
         assert round(float(order.total), 2) == round(
